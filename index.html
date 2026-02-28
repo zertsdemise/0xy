@@ -1,143 +1,154 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Custom Image + Center Text</title>
-
-<style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cute Animal Generator</title>
+  <style>
     body {
-        margin: 0;
-        background: #111;
-        color: white;
-        font-family: Arial, sans-serif;
-        overflow: hidden;
+      background-color: #f0f8ff;
+      font-family: 'Segoe UI', sans-serif;
+      text-align: center;
+      padding: 50px;
     }
 
-    .controls {
-        position: fixed;
-        top: 10px;
-        left: 10px;
-        background: rgba(0,0,0,0.6);
-        padding: 15px;
-        border-radius: 8px;
+    h1 {
+      color: #ff69b4;
+      font-size: 48px;
+      margin-bottom: 30px;
     }
 
-    #displayImage {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        max-width: 90vw;
-        max-height: 90vh;
+    button {
+      padding: 15px 30px;
+      font-size: 18px;
+      background-color: #ff69b4;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-bottom: 30px;
     }
 
-    #centerText {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        color: white;
-        font-size: 48px;
-        text-align: center;
-        pointer-events: none;
-        white-space: pre-wrap;
+    button:hover {
+      background-color: #ff85c1;
     }
 
-    /* Creator Button */
+    img {
+      max-width: 80%;
+      height: auto;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+    }
+
+    #error {
+      color: red;
+      font-size: 18px;
+      margin-top: 20px;
+    }
+
+    /* Creator button */
     #creatorBtn {
-        position: fixed;
-        bottom: 15px;
-        right: 15px;
-        background: #222;
-        color: white;
-        padding: 10px 15px;
-        border-radius: 6px;
-        cursor: pointer;
-        border: 1px solid #444;
-        transition: 0.2s;
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #ff69b4;
+      color: white;
+      padding: 12px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      font-size: 16px;
     }
+
     #creatorBtn:hover {
-        background: #333;
+      background: #ff85c1;
     }
 
     /* Popup */
     #creatorPopup {
-        position: fixed;
-        bottom: 60px;
-        right: 15px;
-        background: rgba(0,0,0,0.85);
-        padding: 15px;
-        border-radius: 8px;
-        width: 220px;
-        display: none;
-        border: 1px solid #444;
+      position: fixed;
+      bottom: 70px;
+      right: 20px;
+      background: white;
+      color: black;
+      padding: 15px;
+      border-radius: 10px;
+      width: 220px;
+      display: none;
+      box-shadow: 0 0 15px rgba(0,0,0,0.3);
+      font-size: 15px;
+      text-align: left;
     }
 
     #creatorPopup a {
-        color: #4da3ff;
-        text-decoration: none;
+      color: #ff69b4;
+      text-decoration: none;
     }
-</style>
+  </style>
 </head>
 <body>
 
-<div class="controls">
-    <label>Image Embed Link:</label><br>
-    <input type="text" id="imgInput" placeholder="Paste image URL..." style="width: 250px;"><br><br>
+  <h1>Cute Animal Generator 🐶🐱🐰</h1>
+  <button onclick="getAnimal()">Show Me Something Cute!</button>
 
-    <label>Center Text:</label><br>
-    <input type="text" id="textInput" placeholder="Enter text..." style="width: 250px;"><br><br>
+  <div id="imageContainer">
+    <img id="animalImage" src="" alt="Cute animal will appear here!" />
+  </div>
 
-    <label>Font:</label><br>
-    <select id="fontSelect">
-        <option value="Arial">Arial</option>
-        <option value="Verdana">Verdana</option>
-        <option value="Courier New">Courier New</option>
-        <option value="Georgia">Georgia</option>
-        <option value="Impact">Impact</option>
-        <option value="Times New Roman">Times New Roman</option>
-    </select><br><br>
+  <div id="error"></div>
 
-    <button onclick="applyImage()">Add Image</button>
-    <button onclick="applyText()">Add Text</button>
-</div>
+  <!-- Creator Button -->
+  <div id="creatorBtn" onclick="toggleCreator()">Creator</div>
 
-<img id="displayImage" src="" alt="">
-<div id="centerText"></div>
-
-<!-- Creator Button -->
-<div id="creatorBtn" onclick="toggleCreator()">Creator</div>
-
-<!-- Popup -->
-<div id="creatorPopup">
+  <!-- Creator Popup -->
+  <div id="creatorPopup">
     <b>Created by:</b><br>
-    Oxy<br><br>
+    Your Name Here<br><br>
 
     <b>Socials:</b><br>
     <a href="https://discord.gg/Rb2zs92n" target="_blank">Discord</a><br>
     <a href="https://instagram.com/ihaveoxy" target="_blank">Instagram</a><br>
-</div>
+  </div>
 
-<script>
-function applyImage() {
-    const url = document.getElementById("imgInput").value;
-    document.getElementById("displayImage").src = url;
-}
+  <script>
+    async function getAnimal() {
+      const urls = [
+        'https://random.dog/woof.json',
+        'https://aws.random.cat/meow',
+        'https://api.thecatapi.com/v1/images/search',
+        'https://api.thedogapi.com/v1/images/search'
+      ];
 
-function applyText() {
-    const text = document.getElementById("textInput").value;
-    const font = document.getElementById("fontSelect").value;
+      const randomUrl = urls[Math.floor(Math.random() * urls.length)];
+      document.getElementById('error').innerText = '';
+      document.getElementById('animalImage').src = '';
 
-    const textBox = document.getElementById("centerText");
-    textBox.style.fontFamily = font;
-    textBox.textContent = text;
-}
+      try {
+        const response = await fetch(randomUrl);
+        const data = await response.json();
 
-function toggleCreator() {
-    const popup = document.getElementById("creatorPopup");
-    popup.style.display = popup.style.display === "block" ? "none" : "block";
-}
-</script>
+        let imageUrl = '';
+
+        if (data.url) imageUrl = data.url;
+        else if (data.file) imageUrl = data.file;
+        else if (Array.isArray(data) && data[0].url) imageUrl = data[0].url;
+
+        if (imageUrl.endsWith('.mp4') || imageUrl.endsWith('.webm')) {
+          throw new Error('Received a video, not an image.');
+        }
+
+        document.getElementById('animalImage').src = imageUrl;
+      } catch (error) {
+        document.getElementById('error').innerText =
+          'Oops! Could not fetch a cute animal. Try again!';
+      }
+    }
+
+    function toggleCreator() {
+      const popup = document.getElementById("creatorPopup");
+      popup.style.display = popup.style.display === "block" ? "none" : "block";
+    }
+  </script>
 
 </body>
 </html>
