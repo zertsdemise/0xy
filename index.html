@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>GameSparker</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #0a1a3f;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 3em;
+      position: relative;
+      display: inline-block;
+      margin-bottom: 20px;
+      animation: glitch 1s infinite;
+    }
+
+    @keyframes glitch {
+      0% { text-shadow: 2px 2px red; }
+      25% { text-shadow: -2px -2px lime; }
+      50% { text-shadow: 2px -2px cyan; }
+      75% { text-shadow: -2px 2px magenta; }
+      100% { text-shadow: 2px 2px red; }
+    }
+
+    button {
+      padding: 12px 24px;
+      font-size: 18px;
+      background: #1e90ff;
+      border: none;
+      color: white;
+      cursor: pointer;
+      border-radius: 8px;
+      margin: 10px;
+    }
+
+    canvas {
+      border: 2px solid white;
+      margin-top: 20px;
+    }
+
+    #gameArea {
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+  <h1>GameSparker</h1>
+  <p>Click below to spark a random mini-game!</p>
+  <button id="playButton">Play a Random Game</button>
+  <div id="gameArea"></div>
+
+  <script>
+    const gameArea = document.getElementById("gameArea");
+
+    const games = [
+      function clickChallenge() {
+        gameArea.innerHTML = "<h2>Click Challenge</h2><p>Click the button as fast as you can!</p>";
+        let count = 0;
+        const btn = document.createElement("button");
+        btn.textContent = "Click Me!";
+        btn.onclick = () => {
+          count++;
+          btn.textContent = `Clicks: ${count}`;
+        };
+        gameArea.appendChild(btn);
+      },
+
+      function reactionTest() {
+        gameArea.innerHTML = "<h2>Reaction Test</h2><p>Wait for green, then click!</p>";
+        const box = document.createElement("div");
+        box.style.width = "200px";
+        box.style.height = "200px";
+        box.style.margin = "20px auto";
+        box.style.background = "red";
+        gameArea.appendChild(box);
+
+        let startTime;
+        setTimeout(() => {
+          box.style.background = "green";
+          startTime = Date.now();
+        }, Math.random() * 3000 + 1000);
+
+        box.onclick = () => {
+          if (box.style.background === "green") {
+            const reaction = Date.now() - startTime;
+            gameArea.innerHTML += `<p>Your reaction time: ${reaction} ms</p>`;
+          } else {
+            gameArea.innerHTML += `<p>Too soon! Wait for green.</p>`;
+          }
+        };
+      },
+
+      function dodgeGame() {
+        gameArea.innerHTML = "<h2>Dodge Game</h2><p>Use arrow keys to dodge the falling block!</p>";
+        const canvas = document.createElement("canvas");
+        canvas.width = 400;
+        canvas.height = 400;
+        gameArea.appendChild(canvas);
+        const ctx = canvas.getContext("2d");
+
+        let player = { x: 180, y: 350, w: 40, h: 40 };
+        let block = { x: Math.random() * 360, y: 0, w: 40, h: 40 };
+        let keys = {};
+
+        document.addEventListener("keydown", e => keys[e.key] = true);
+        document.addEventListener("keyup", e => keys[e.key] = false);
+
+        function update() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          if (keys["ArrowLeft"]) player.x -= 5;
+          if (keys["ArrowRight"]) player.x += 5;
+          player.x = Math.max(0, Math.min(canvas.width - player.w, player.x));
+
+          block.y += 5;
+          if (block.y > canvas.height) {
+            block.y = 0;
+            block.x = Math.random() * (canvas.width - block.w);
+          }
+
+          if (
+            player.x < block.x + block.w &&
+            player.x + player.w > block.x &&
+            player.y < block.y + block.h &&
+            player.y + player.h > block.y
+          ) {
+            alert("Game Over!");
+            block.y = 0;
+            block.x = Math.random() * (canvas.width - block.w);
+          }
+
+          ctx.fillStyle = "white";
+          ctx.fillRect(player.x, player.y, player.w, player.h);
+          ctx.fillStyle = "red";
+          ctx.fillRect(block.x, block.y, block.w, block.h);
+
+          requestAnimationFrame(update);
+        }
+
+        update();
+      },
+
+      function memoryMatch() {
+        gameArea.innerHTML = "<h2>Memory Match</h2><p>Find the matching pairs!</p>";
+        const values = ["A", "B", "C", "D", "E", "F"];
+        const cards = [...values, ...values].sort(() => Math.random() - 0.5);
+        const grid = document.createElement("div");
+        grid.style.display = "grid";
+        grid.style.gridTemplateColumns = "repeat(4, 60px)";
+        grid.style.gap = "10px";
+        grid.style.justifyContent = "center";
+        gameArea.appendChild(grid);
+
+        let first = null;
+        let second = null;
+        let matched = 0;
+
+        cards.forEach((val, i) => {
+          const card = document.createElement("button");
+          card.textContent = "?";
+          card.dataset.value = val;
+          card.onclick = () => {
+            if (card.disabled || card === first || second) return;
+            card.textContent = val;
+            if (!first) {
+              first = card;
+            } else {
+              second = card;
+              if (first.dataset.value === second.dataset.value) {
+                first.disabled = true;
+                second.disabled = true;
+                matched += 2;
+                first = null;
+                second = null;
+                if (matched === cards.length) {
+                  gameArea.innerHTML += "<p>You matched all pairs!</p>";
+                }
+              } else {
+                setTimeout(() => {
+                  first.textContent = "?";
+                  second.textContent = "?";
+                  first = null;
+                  second = null;
+                }, 1000);
+              }
+            }
+          };
+          grid.appendChild(card);
+        });
+      },
+
+      function colorTap() {
+        gameArea.innerHTML = "<h2>Color Tap</h2><p>Tap the matching color!</p>";
+        const colors = ["red", "green", "blue", "yellow"];
+        const target = colors[Math.floor(Math.random() * colors.length)];
+        gameArea.innerHTML += `<p>Find and click: <strong>${target}</strong></p>`;
+        const grid = document.createElement("div");
+        grid.style.display = "grid";
+        grid.style.gridTemplateColumns = "repeat(4, 80px)";
+        grid.style.gap = "10px";
+        grid.style.justifyContent = "center";
+        gameArea.appendChild(grid);
+
+        colors.sort(() => Math.random() - 0.5).forEach(color => {
+          const btn = document.createElement("button");
+          btn.style.background = color;
+          btn.style.width = "80px";
+          btn.style.height = "80px";
+          btn.onclick = () => {
+            if (color === target) {
+              gameArea.innerHTML += "<p>Correct!</p>";
+            } else {
+              gameArea.innerHTML += "<p>Wrong color!</p>";
+            }
+          };
+          grid.appendChild(btn);
+        });
+      }
+    ];
+
+    function loadRandomGame() {
+      const game = games[Math.floor(Math.random() * games.length)];
+      game();
+    }
+
+    document.getElementById("playButton").addEventListener("click", loadRandomGame);
+  </script>
+</body>
+</html>
