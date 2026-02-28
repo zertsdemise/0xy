@@ -1,236 +1,143 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>GameSparker</title>
-  <style>
+<meta charset="UTF-8">
+<title>Custom Image + Center Text</title>
+
+<style>
     body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: #0a1a3f;
-      color: white;
-      text-align: center;
-      padding: 20px;
+        margin: 0;
+        background: #111;
+        color: white;
+        font-family: Arial, sans-serif;
+        overflow: hidden;
     }
 
-    h1 {
-      font-size: 3em;
-      position: relative;
-      display: inline-block;
-      margin-bottom: 20px;
-      animation: glitch 1s infinite;
+    .controls {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        background: rgba(0,0,0,0.6);
+        padding: 15px;
+        border-radius: 8px;
     }
 
-    @keyframes glitch {
-      0% { text-shadow: 2px 2px red; }
-      25% { text-shadow: -2px -2px lime; }
-      50% { text-shadow: 2px -2px cyan; }
-      75% { text-shadow: -2px 2px magenta; }
-      100% { text-shadow: 2px 2px red; }
+    #displayImage {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        max-width: 90vw;
+        max-height: 90vh;
     }
 
-    button {
-      padding: 12px 24px;
-      font-size: 18px;
-      background: #1e90ff;
-      border: none;
-      color: white;
-      cursor: pointer;
-      border-radius: 8px;
-      margin: 10px;
+    #centerText {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-size: 48px;
+        text-align: center;
+        pointer-events: none;
+        white-space: pre-wrap;
     }
 
-    canvas {
-      border: 2px solid white;
-      margin-top: 20px;
+    /* Creator Button */
+    #creatorBtn {
+        position: fixed;
+        bottom: 15px;
+        right: 15px;
+        background: #222;
+        color: white;
+        padding: 10px 15px;
+        border-radius: 6px;
+        cursor: pointer;
+        border: 1px solid #444;
+        transition: 0.2s;
+    }
+    #creatorBtn:hover {
+        background: #333;
     }
 
-    #gameArea {
-      margin-top: 30px;
+    /* Popup */
+    #creatorPopup {
+        position: fixed;
+        bottom: 60px;
+        right: 15px;
+        background: rgba(0,0,0,0.85);
+        padding: 15px;
+        border-radius: 8px;
+        width: 220px;
+        display: none;
+        border: 1px solid #444;
     }
-  </style>
+
+    #creatorPopup a {
+        color: #4da3ff;
+        text-decoration: none;
+    }
+</style>
 </head>
 <body>
-  <h1>GameSparker</h1>
-  <p>Click below to spark a random mini-game!</p>
-  <button id="playButton">Play a Random Game</button>
-  <div id="gameArea"></div>
 
-  <script>
-    const gameArea = document.getElementById("gameArea");
+<div class="controls">
+    <label>Image Embed Link:</label><br>
+    <input type="text" id="imgInput" placeholder="Paste image URL..." style="width: 250px;"><br><br>
 
-    const games = [
-      function clickChallenge() {
-        gameArea.innerHTML = "<h2>Click Challenge</h2><p>Click the button as fast as you can!</p>";
-        let count = 0;
-        const btn = document.createElement("button");
-        btn.textContent = "Click Me!";
-        btn.onclick = () => {
-          count++;
-          btn.textContent = `Clicks: ${count}`;
-        };
-        gameArea.appendChild(btn);
-      },
+    <label>Center Text:</label><br>
+    <input type="text" id="textInput" placeholder="Enter text..." style="width: 250px;"><br><br>
 
-      function reactionTest() {
-        gameArea.innerHTML = "<h2>Reaction Test</h2><p>Wait for green, then click!</p>";
-        const box = document.createElement("div");
-        box.style.width = "200px";
-        box.style.height = "200px";
-        box.style.margin = "20px auto";
-        box.style.background = "red";
-        gameArea.appendChild(box);
+    <label>Font:</label><br>
+    <select id="fontSelect">
+        <option value="Arial">Arial</option>
+        <option value="Verdana">Verdana</option>
+        <option value="Courier New">Courier New</option>
+        <option value="Georgia">Georgia</option>
+        <option value="Impact">Impact</option>
+        <option value="Times New Roman">Times New Roman</option>
+    </select><br><br>
 
-        let startTime;
-        setTimeout(() => {
-          box.style.background = "green";
-          startTime = Date.now();
-        }, Math.random() * 3000 + 1000);
+    <button onclick="applyImage()">Add Image</button>
+    <button onclick="applyText()">Add Text</button>
+</div>
 
-        box.onclick = () => {
-          if (box.style.background === "green") {
-            const reaction = Date.now() - startTime;
-            gameArea.innerHTML += `<p>Your reaction time: ${reaction} ms</p>`;
-          } else {
-            gameArea.innerHTML += `<p>Too soon! Wait for green.</p>`;
-          }
-        };
-      },
+<img id="displayImage" src="" alt="">
+<div id="centerText"></div>
 
-      function dodgeGame() {
-        gameArea.innerHTML = "<h2>Dodge Game</h2><p>Use arrow keys to dodge the falling block!</p>";
-        const canvas = document.createElement("canvas");
-        canvas.width = 400;
-        canvas.height = 400;
-        gameArea.appendChild(canvas);
-        const ctx = canvas.getContext("2d");
+<!-- Creator Button -->
+<div id="creatorBtn" onclick="toggleCreator()">Creator</div>
 
-        let player = { x: 180, y: 350, w: 40, h: 40 };
-        let block = { x: Math.random() * 360, y: 0, w: 40, h: 40 };
-        let keys = {};
+<!-- Popup -->
+<div id="creatorPopup">
+    <b>Created by:</b><br>
+    Oxy<br><br>
 
-        document.addEventListener("keydown", e => keys[e.key] = true);
-        document.addEventListener("keyup", e => keys[e.key] = false);
+    <b>Socials:</b><br>
+    <a href="https://discord.gg/Rb2zs92n" target="_blank">Discord</a><br>
+    <a href="https://instagram.com/ihaveoxy" target="_blank">Instagram</a><br>
+</div>
 
-        function update() {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
+<script>
+function applyImage() {
+    const url = document.getElementById("imgInput").value;
+    document.getElementById("displayImage").src = url;
+}
 
-          if (keys["ArrowLeft"]) player.x -= 5;
-          if (keys["ArrowRight"]) player.x += 5;
-          player.x = Math.max(0, Math.min(canvas.width - player.w, player.x));
+function applyText() {
+    const text = document.getElementById("textInput").value;
+    const font = document.getElementById("fontSelect").value;
 
-          block.y += 5;
-          if (block.y > canvas.height) {
-            block.y = 0;
-            block.x = Math.random() * (canvas.width - block.w);
-          }
+    const textBox = document.getElementById("centerText");
+    textBox.style.fontFamily = font;
+    textBox.textContent = text;
+}
 
-          if (
-            player.x < block.x + block.w &&
-            player.x + player.w > block.x &&
-            player.y < block.y + block.h &&
-            player.y + player.h > block.y
-          ) {
-            alert("Game Over!");
-            block.y = 0;
-            block.x = Math.random() * (canvas.width - block.w);
-          }
+function toggleCreator() {
+    const popup = document.getElementById("creatorPopup");
+    popup.style.display = popup.style.display === "block" ? "none" : "block";
+}
+</script>
 
-          ctx.fillStyle = "white";
-          ctx.fillRect(player.x, player.y, player.w, player.h);
-          ctx.fillStyle = "red";
-          ctx.fillRect(block.x, block.y, block.w, block.h);
-
-          requestAnimationFrame(update);
-        }
-
-        update();
-      },
-
-      function memoryMatch() {
-        gameArea.innerHTML = "<h2>Memory Match</h2><p>Find the matching pairs!</p>";
-        const values = ["A", "B", "C", "D", "E", "F"];
-        const cards = [...values, ...values].sort(() => Math.random() - 0.5);
-        const grid = document.createElement("div");
-        grid.style.display = "grid";
-        grid.style.gridTemplateColumns = "repeat(4, 60px)";
-        grid.style.gap = "10px";
-        grid.style.justifyContent = "center";
-        gameArea.appendChild(grid);
-
-        let first = null;
-        let second = null;
-        let matched = 0;
-
-        cards.forEach((val, i) => {
-          const card = document.createElement("button");
-          card.textContent = "?";
-          card.dataset.value = val;
-          card.onclick = () => {
-            if (card.disabled || card === first || second) return;
-            card.textContent = val;
-            if (!first) {
-              first = card;
-            } else {
-              second = card;
-              if (first.dataset.value === second.dataset.value) {
-                first.disabled = true;
-                second.disabled = true;
-                matched += 2;
-                first = null;
-                second = null;
-                if (matched === cards.length) {
-                  gameArea.innerHTML += "<p>You matched all pairs!</p>";
-                }
-              } else {
-                setTimeout(() => {
-                  first.textContent = "?";
-                  second.textContent = "?";
-                  first = null;
-                  second = null;
-                }, 1000);
-              }
-            }
-          };
-          grid.appendChild(card);
-        });
-      },
-
-      function colorTap() {
-        gameArea.innerHTML = "<h2>Color Tap</h2><p>Tap the matching color!</p>";
-        const colors = ["red", "green", "blue", "yellow"];
-        const target = colors[Math.floor(Math.random() * colors.length)];
-        gameArea.innerHTML += `<p>Find and click: <strong>${target}</strong></p>`;
-        const grid = document.createElement("div");
-        grid.style.display = "grid";
-        grid.style.gridTemplateColumns = "repeat(4, 80px)";
-        grid.style.gap = "10px";
-        grid.style.justifyContent = "center";
-        gameArea.appendChild(grid);
-
-        colors.sort(() => Math.random() - 0.5).forEach(color => {
-          const btn = document.createElement("button");
-          btn.style.background = color;
-          btn.style.width = "80px";
-          btn.style.height = "80px";
-          btn.onclick = () => {
-            if (color === target) {
-              gameArea.innerHTML += "<p>Correct!</p>";
-            } else {
-              gameArea.innerHTML += "<p>Wrong color!</p>";
-            }
-          };
-          grid.appendChild(btn);
-        });
-      }
-    ];
-
-    function loadRandomGame() {
-      const game = games[Math.floor(Math.random() * games.length)];
-      game();
-    }
-
-    document.getElementById("playButton").addEventListener("click", loadRandomGame);
-  </script>
 </body>
 </html>
